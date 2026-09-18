@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}My Account{% endblock %}
+{% block content %}
+    <h1 class="mb-4">My Account</h1>
+    <dl class="row">
+        <dt class="col-sm-3">Mobile number</dt>
+        <dd class="col-sm-9">{{ user.phone_number }}</dd>
+
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">{{ user.full_name|default:"—" }}</dd>
+
+        <dt class="col-sm-3">Role</dt>
+        <dd class="col-sm-9"><span class="badge bg-secondary">{{ user.role }}</span></dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">{{ user.is_active|yesno:"Active,Inactive" }}</dd>
+
+        <dt class="col-sm-3">Joined</dt>
+        <dd class="col-sm-9">{{ user.date_joined }}</dd>
+    </dl>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Spare Parts Ledger — Monthly Summary{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Spare Parts Ledger — Monthly Summary</h1>
+    <p class="text-muted">Current balance: <strong>{{ current_balance }}</strong></p>
+
+    {% if summary %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead><tr><th>Month</th><th>Previous Balance</th><th>Total In</th><th>Total Out</th><th>Balance</th><th></th></tr></thead>
+                <tbody>
+                    {% for row in summary %}
+                        <tr>
+                            <td>{{ row.month_key }}</td>
+                            <td>{{ row.previous_balance }}</td>
+                            <td>{{ row.total_credit }}</td>
+                            <td>{{ row.total_debit }}</td>
+                            <td>{{ row.balance }}</td>
+                            <td>
+                                {% if row.month_key in closed_months %}
+                                    <span class="badge bg-secondary">Closed</span>
+                                {% elif perms.spares.add_spareledgermonthlyclose %}
+                                    <form method="post" action="{% url 'spares:close_month' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="month_key" value="{{ row.month_key }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Close month</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">No transactions recorded yet.</p>
+    {% endif %}
+{% endblock %}

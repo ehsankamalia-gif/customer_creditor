@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}My Credit Dashboard{% endblock %}
+{% block content %}
+    <h1 class="mb-4">My Credit Dashboard</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 card-title text-muted">Total Outstanding</h2>
+                    <p class="h3 mb-0">{{ total_outstanding }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 card-title text-muted">Total Paid</h2>
+                    <p class="h3 mb-0">{{ total_paid }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 card-title text-muted">Quick Links</h2>
+                    <a href="{% url 'credit:running_ledger' %}" class="btn btn-outline-secondary btn-sm me-2">Running Ledger</a>
+                    <a href="{% url 'credit:payments' %}" class="btn btn-outline-secondary btn-sm">Payment History</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h5 mb-3">Active Credit Sales</h2>
+    {% if active_sales %}
+        <div class="table-responsive mb-4">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Sale</th>
+                        <th>Item</th>
+                        <th>Sale Date</th>
+                        <th>Credit Price</th>
+                        <th>Remaining</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in active_sales %}
+                        <tr>
+                            <td>{{ sale.display_id }}</td>
+                            <td>{{ sale.item_label }}</td>
+                            <td>{{ sale.sale_date }}</td>
+                            <td>{{ sale.credit_price }}</td>
+                            <td>{{ sale.remaining_balance }}</td>
+                            <td><span class="badge {% if sale.status == 'OVERDUE' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ sale.get_status_display }}</span></td>
+                            <td><a href="{% url 'credit:sale_detail' sale.pk %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted mb-4">No active credit sales.</p>
+    {% endif %}
+
+    <h2 class="h5 mb-3">Recently Closed</h2>
+    {% if closed_sales %}
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Sale</th>
+                        <th>Item</th>
+                        <th>Sale Date</th>
+                        <th>Credit Price</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in closed_sales %}
+                        <tr>
+                            <td>{{ sale.display_id }}</td>
+                            <td>{{ sale.item_label }}</td>
+                            <td>{{ sale.sale_date }}</td>
+                            <td>{{ sale.credit_price }}</td>
+                            <td><a href="{% url 'credit:sale_detail' sale.pk %}" class="btn btn-sm btn-outline-secondary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">No closed credit sales yet.</p>
+    {% endif %}
+{% endblock %}

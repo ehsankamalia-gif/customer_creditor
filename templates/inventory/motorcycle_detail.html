@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load inventory_extras %}
+{% block title %}{{ motorcycle.chassis_number }}{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="mb-1">{{ motorcycle.chassis_number }}</h1>
+            <p class="text-muted mb-0">Engine No. {{ motorcycle.engine_number }} &mdash; {{ motorcycle.product_model }}</p>
+        </div>
+        <div class="text-end">
+            <span class="badge {{ motorcycle.status|status_badge_class }} fs-6 mb-2">{{ motorcycle.get_status_display }}</span>
+            <div>
+                {% if perms.inventory.change_motorcycle %}
+                    <a href="{% url 'inventory:edit_motorcycle' motorcycle.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                {% endif %}
+                {% if perms.inventory.delete_motorcycle and motorcycle.is_active %}
+                    <form method="post" action="{% url 'inventory:archive_motorcycle' motorcycle.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Archive this unit? It will be hidden from the inventory list but not deleted.');">Archive</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if not motorcycle.is_active %}
+        <div class="alert alert-secondary">This unit is archived.
+            {% if perms.inventory.delete_motorcycle %}
+                <form method="post" action="{% url 'inventory:restore_motorcycle' motorcycle.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">Restore</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <h2 class="h5 mb-3">Identification</h2>
+            <dl class="row">
+                <dt class="col-sm-5">Chassis Number</dt><dd class="col-sm-7">{{ motorcycle.chassis_number }}</dd>
+                <dt class="col-sm-5">Engine Number</dt><dd class="col-sm-7">{{ motorcycle.engine_number }}</dd>
+                <dt class="col-sm-5">VIN</dt><dd class="col-sm-7">{{ motorcycle.vin|default:"—" }}</dd>
+                <dt class="col-sm-5">Model</dt><dd class="col-sm-7">{{ motorcycle.product_model }}</dd>
+                <dt class="col-sm-5">Manufacture Year</dt><dd class="col-sm-7">{{ motorcycle.year }}</dd>
+                <dt class="col-sm-5">Color</dt><dd class="col-sm-7">{{ motorcycle.color|default:"—" }}</dd>
+            </dl>
+
+            <h2 class="h5 mb-3">Purchase Information</h2>
+            <dl class="row">
+                <dt class="col-sm-5">Supplier</dt><dd class="col-sm-7">{{ motorcycle.purchase_supplier|default:"—" }}</dd>
+                <dt class="col-sm-5">Purchase/Delivery Order</dt><dd class="col-sm-7">{{ motorcycle.purchase_reference|default:"—" }}</dd>
+                <dt class="col-sm-5">Purchase Date</dt><dd class="col-sm-7">{{ motorcycle.purchase_date }}</dd>
+                <dt class="col-sm-5">Purchase Price</dt><dd class="col-sm-7">{{ motorcycle.purchase_price }}</dd>
+            </dl>
+        </div>
+        <div class="col-md-6">
+            <h2 class="h5 mb-3">Pricing</h2>
+            <dl class="row">
+                <dt class="col-sm-5">Selling Price</dt><dd class="col-sm-7">{{ motorcycle.selling_price }}</dd>
+            </dl>
+
+            <h2 class="h5 mb-3">Stock Information</h2>
+            <dl class="row">
+                <dt class="col-sm-5">Status</dt>
+                <dd class="col-sm-7"><span class="badge {{ motorcycle.status|status_badge_class }}">{{ motorcycle.get_status_display }}</span></dd>
+                <dt class="col-sm-5">Location</dt><dd class="col-sm-7">{{ motorcycle.location|default:"—" }}</dd>
+                <dt class="col-sm-5">Added to Stock</dt><dd class="col-sm-7">{{ motorcycle.created_at }}</dd>
+                <dt class="col-sm-5">Date Sold</dt><dd class="col-sm-7">{{ motorcycle.date_sold|default:"—" }}</dd>
+                <dt class="col-sm-5">Last Updated</dt><dd class="col-sm-7">{{ motorcycle.updated_at }}</dd>
+            </dl>
+
+            {% if perms.inventory.change_motorcycle %}
+                <h2 class="h5 mb-3">Change Status</h2>
+                {% if motorcycle.status == 'SOLD' %}
+                    <form method="post" action="{% url 'inventory:return_to_stock' motorcycle.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-warning"
+                                onclick="return confirm('Return this unit to stock? This reverses the sale on the inventory record.');">
+                            Return to Stock
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{% url 'inventory:change_status' motorcycle.pk %}" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <select name="status" class="form-select form-select-sm" style="max-width: 200px;">
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if value == motorcycle.status %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if motorcycle.notes %}
+        <h2 class="h5 mt-4 mb-2">Notes</h2>
+        <p>{{ motorcycle.notes|linebreaksbr }}</p>
+    {% endif %}
+{% endblock %}

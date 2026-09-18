@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Credit Sales{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Credit Sales</h1>
+        <div>
+            <a href="{% url 'credit:staff_export_sales_csv' %}" class="btn btn-outline-secondary btn-sm">Export CSV</a>
+            {% if perms.credit.add_creditsale %}
+                <a href="{% url 'credit:staff_create_sale' %}" class="btn btn-primary btn-sm">New Credit Sale</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if sales %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr><th>Sale</th><th>Customer</th><th>Item</th><th>Status</th><th>Credit Price</th><th>Remaining</th><th>Sale Date</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale.display_id }}</td>
+                            <td>{{ sale.customer }}</td>
+                            <td>{{ sale.item_label }}</td>
+                            <td><span class="badge {% if sale.status == 'OVERDUE' %}bg-danger{% elif sale.status == 'CLOSED' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">{{ sale.get_status_display }}</span></td>
+                            <td>{{ sale.credit_price }}</td>
+                            <td>{{ sale.remaining_balance }}</td>
+                            <td>{{ sale.sale_date }}</td>
+                            <td><a href="{% url 'credit:staff_sale_detail' sale.pk %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">No credit sales recorded yet.</p>
+    {% endif %}
+{% endblock %}

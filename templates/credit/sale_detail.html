@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ sale.display_id }}{% endblock %}
+{% block content %}
+    <h1 class="mb-4">{{ sale.display_id }} &mdash; {{ sale.item_label }}</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9"><span class="badge {% if sale.status == 'OVERDUE' %}bg-danger{% elif sale.status == 'CLOSED' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">{{ sale.get_status_display }}</span></dd>
+
+        <dt class="col-sm-3">Sale Date</dt>
+        <dd class="col-sm-9">{{ sale.sale_date }}</dd>
+
+        <dt class="col-sm-3">Credit Price</dt>
+        <dd class="col-sm-9">{{ sale.credit_price }}</dd>
+
+        <dt class="col-sm-3">Down Payment</dt>
+        <dd class="col-sm-9">{{ sale.down_payment }} ({{ sale.down_payment_method }})</dd>
+
+        <dt class="col-sm-3">Remaining Balance</dt>
+        <dd class="col-sm-9">{{ sale.remaining_balance }}</dd>
+
+        <dt class="col-sm-3">Duration</dt>
+        <dd class="col-sm-9">{{ sale.duration_months }} months, due {{ sale.due_date }}</dd>
+    </dl>
+
+    <h2 class="h5 mt-4 mb-3">Instalment Schedule</h2>
+    <div class="table-responsive mb-4">
+        <table class="table table-sm align-middle">
+            <thead><tr><th>#</th><th>Due Date</th><th>Amount Due</th><th>Amount Paid</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for i in installments %}
+                    <tr>
+                        <td>{{ i.installment_no }}</td>
+                        <td>{{ i.due_date }}</td>
+                        <td>{{ i.amount_due }}</td>
+                        <td>{{ i.amount_paid }}</td>
+                        <td><span class="badge {% if i.status == 'PAID' %}bg-success{% elif i.status == 'PARTIAL' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ i.get_status_display }}</span></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="h5 mb-3">Ledger</h2>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead>
+            <tbody>
+                {% for entry in ledger_entries %}
+                    <tr>
+                        <td>{{ entry.entry_date }}</td>
+                        <td>{{ entry.description }}</td>
+                        <td>{{ entry.debit|default_if_none:"" }}</td>
+                        <td>{{ entry.credit|default_if_none:"" }}</td>
+                        <td>{{ entry.balance }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

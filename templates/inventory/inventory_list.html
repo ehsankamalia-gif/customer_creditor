@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load inventory_extras %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Motorcycle Inventory</h1>
+        <div>
+            {% if perms.inventory.add_supplier %}
+                <a href="{% url 'inventory:add_supplier' %}" class="btn btn-outline-secondary btn-sm">Add Supplier</a>
+            {% endif %}
+            {% if perms.inventory.add_stocklocation %}
+                <a href="{% url 'inventory:add_location' %}" class="btn btn-outline-secondary btn-sm">Add Location</a>
+            {% endif %}
+            {% if perms.inventory.add_productmodel %}
+                <a href="{% url 'inventory:add_product_model' %}" class="btn btn-outline-secondary btn-sm">Add Model</a>
+            {% endif %}
+            {% if perms.inventory.add_motorcycle %}
+                <a href="{% url 'inventory:import_stock' %}" class="btn btn-outline-primary btn-sm">Import Stock</a>
+                <a href="{% url 'inventory:add_motorcycle' %}" class="btn btn-primary btn-sm">Add Motorcycle</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="search" name="q" class="form-control" placeholder="Search chassis, engine, model or color..."
+                   value="{{ filters.q }}">
+        </div>
+        <div class="col-6 col-md-2">
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All statuses</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if value == filters.status %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <select name="model" class="form-select" onchange="this.form.submit()">
+                <option value="">All models</option>
+                {% for m in product_models %}
+                    <option value="{{ m.id }}" {% if filters.model == m.id|stringformat:"s" %}selected{% endif %}>{{ m.model_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <select name="color" class="form-select" onchange="this.form.submit()">
+                <option value="">All colors</option>
+                {% for c in colors %}
+                    <option value="{{ c }}" {% if c == filters.color %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <select name="location" class="form-select" onchange="this.form.submit()">
+                <option value="">All locations</option>
+                {% for l in locations %}
+                    <option value="{{ l.id }}" {% if filters.location == l.id|stringformat:"s" %}selected{% endif %}>{{ l.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i> Search</button>
+        </div>
+        {% if filters.q or filters.status or filters.model or filters.color or filters.location %}
+            <div class="col-auto">
+                <a href="{% url 'inventory:inventory_list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        {% endif %}
+    </form>
+
+    {% if motorcycles %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th><a class="text-decoration-none" href="?{{ request.GET.urlencode }}&sort=chassis_number">Chassis Number</a></th>
+                        <th>Engine Number</th>
+                        <th>Model</th>
+                        <th>Color</th>
+                        <th><a class="text-decoration-none" href="?{{ request.GET.urlencode }}&sort=year">Year</a></th>
+                        <th><a class="text-decoration-none" href="?{{ request.GET.urlencode }}&sort=selling_price">Selling Price</a></th>
+                        <th><a class="text-decoration-none" href="?{{ request.GET.urlencode }}&sort=status">Status</a></th>
+                        <th>Location</th>
+                        <th><a class="text-decoration-none" href="?{{ request.GET.urlencode }}&sort=purchase_date">Purchase Date</a></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in motorcycles %}
+                        <tr>
+                            <td>{{ m.chassis_number }}</td>
+                            <td>{{ m.engine_number }}</td>
+                            <td>{{ m.product_model }}</td>
+                            <td>{{ m.color|default:"—" }}</td>
+                            <td>{{ m.year }}</td>
+                            <td>{{ m.selling_price }}</td>
+                            <td><span class="badge {{ m.status|status_badge_class }}">{{ m.get_status_display }}</span></td>
+                            <td>{{ m.location|default:"—" }}</td>
+                            <td>{{ m.purchase_date }}</td>
+                            <td><a href="{% url 'inventory:motorcycle_detail' m.pk %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">No motorcycles match your search.</p>
+    {% endif %}
+{% endblock %}

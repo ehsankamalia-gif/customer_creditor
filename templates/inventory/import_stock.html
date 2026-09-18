@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Import Stock{% endblock %}
+{% block content %}
+    <h1 class="mb-2">Import Stock</h1>
+    <p class="text-muted mb-4">
+        Load or sync motorcycle stock from a supplier portal export (e.g. a dealer stock list).
+        Accepts an Excel (.xlsx) or CSV file straight from the portal's own Export button, or
+        pasted table text. Expected columns: <strong>Purchase Order, Recv. Date, Model, Colour,
+        Engine No, Chassis No, Status</strong> &mdash; column names are matched flexibly, and a
+        title row above the real header (e.g. a report heading) is detected and skipped automatically.
+        Re-running the import is safe: existing units (matched by chassis number) only have their
+        purchase reference, date and status refreshed &mdash; pricing, location and notes you've entered
+        are never overwritten, and a unit already marked <strong>Sold</strong> here is never changed back.
+    </p>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Import</button>
+                <a href="{% url 'inventory:inventory_list' %}" class="btn btn-link">Back to Inventory</a>
+            </form>
+        </div>
+    </div>
+
+    {% if result %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h2 class="h5 mb-3">Import Results</h2>
+                <div class="row g-3 mb-3">
+                    <div class="col-4">
+                        <div class="card text-center"><div class="card-body">
+                            <p class="h4 mb-0 text-success">{{ result.created }}</p>
+                            <p class="text-muted small mb-0">New units added</p>
+                        </div></div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card text-center"><div class="card-body">
+                            <p class="h4 mb-0 text-primary">{{ result.updated }}</p>
+                            <p class="text-muted small mb-0">Existing units updated</p>
+                        </div></div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card text-center"><div class="card-body">
+                            <p class="h4 mb-0 text-muted">{{ result.unchanged }}</p>
+                            <p class="text-muted small mb-0">Already up to date</p>
+                        </div></div>
+                    </div>
+                </div>
+
+                {% if result.created %}
+                    <div class="alert alert-info">
+                        Newly added units have no purchase/selling price yet (the portal doesn't provide pricing) &mdash;
+                        open each one from the <a href="{% url 'inventory:inventory_list' %}">inventory list</a> and use Edit to set it before selling.
+                    </div>
+                {% endif %}
+
+                {% if result.errors %}
+                    <h3 class="h6">Rows that couldn't be imported</h3>
+                    <ul class="text-danger small">
+                        {% for error in result.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

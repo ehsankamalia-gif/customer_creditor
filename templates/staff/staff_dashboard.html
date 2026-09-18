@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Staff Dashboard</h1>
+    <div class="row g-3">
+        {% if perms.accounts.view_user %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">User Directory</h2>
+                        <p class="card-text text-muted">Browse registered users.</p>
+                        <a href="{% url 'staff:user_directory' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if perms.accounts.add_user %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Create Customer</h2>
+                        <p class="card-text text-muted">Register a new customer account.</p>
+                        <a href="{% url 'staff:create_customer' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if perms.credit.view_creditsale %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Credit Sales</h2>
+                        <p class="card-text text-muted">Record credit sales, payments and view customer ledgers.</p>
+                        <a href="{% url 'credit:staff_sales' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Credit Customers</h2>
+                        <p class="card-text text-muted">Per-customer credit summary and ledger.</p>
+                        <a href="{% url 'credit:staff_customer_summary' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Transaction History</h2>
+                        <p class="card-text text-muted">Every ledger entry across all customers.</p>
+                        <a href="{% url 'credit:staff_transactions' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if perms.inventory.view_motorcycle %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Inventory</h2>
+                        <p class="card-text text-muted">Motorcycle stock, models and dashboard.</p>
+                        <a href="{% url 'inventory:dashboard' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if perms.spares.view_spareledgertransaction %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Spare Parts Ledger</h2>
+                        <p class="card-text text-muted">Shop cash ledger: transactions and monthly reports.</p>
+                        <a href="{% url 'spares:transactions' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if user.is_superuser %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Create Account</h2>
+                        <p class="card-text text-muted">Register a new staff member or customer.</p>
+                        <a href="{% url 'staff:admin_create_account' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 card-title">Manage Staff &amp; Permissions</h2>
+                        <p class="card-text text-muted">Promote users to staff and control exactly what they can access.</p>
+                        <a href="{% url 'staff:staff_management' %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if not perms.accounts.view_user and not perms.accounts.add_user and not perms.credit.view_creditsale and not perms.inventory.view_motorcycle and not perms.spares.view_spareledgertransaction and not user.is_superuser %}
+            <div class="col-12">
+                <p class="text-muted">The admin hasn't granted you access to any staff features yet.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

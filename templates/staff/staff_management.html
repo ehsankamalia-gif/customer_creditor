@@ -94,7 +94,7 @@
                 },
                 methods: {
                     async loadUsers() {
-                        const res = await fetch("{% url 'accounts:api_user_list' %}");
+                        const res = await fetch("{% url 'staff:api_user_list' %}");
                         const data = await res.json();
                         this.users = data.users.map((u) => ({ ...u, is_staff_flag: u.role === 'staff' }));
                         this.loading = false;

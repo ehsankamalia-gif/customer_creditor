@@ -1,9 +1,9 @@
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 
 from .forms import SignUpForm
-from .mixins import SuperuserRequiredMixin, StaffPermissionRequiredMixin, StaffRequiredMixin
 
 
 class SignUpView(CreateView):
@@ -21,14 +21,7 @@ class HomeView(TemplateView):
     template_name = 'home.html'
 
 
-class StaffDashboardView(StaffRequiredMixin, TemplateView):
-    template_name = 'accounts/staff_dashboard.html'
+class AccountView(LoginRequiredMixin, TemplateView):
+    """A user's own account details. Every role - including customers - can reach this."""
 
-
-class UserDirectoryView(StaffPermissionRequiredMixin, TemplateView):
-    permission_required = 'accounts.view_user'
-    template_name = 'accounts/user_directory.html'
-
-
-class StaffManagementView(SuperuserRequiredMixin, TemplateView):
-    template_name = 'accounts/staff_management.html'
+    template_name = 'accounts/account.html'

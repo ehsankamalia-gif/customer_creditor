@@ -2,11 +2,9 @@ import json
 from functools import wraps
 
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 
-from .models import User
-from .permissions import assignable_permissions
+from accounts import services
 
 
 def staff_permission_required_json(perm):
@@ -34,60 +32,34 @@ def superuser_required_json(view_func):
     return wrapper
 
 
-def _serialize_user(user):
-    return {
-        'id': user.id,
-        'phone_number': user.phone_number,
-        'full_name': user.full_name,
-        'role': user.role,
-        'is_active': user.is_active,
-    }
-
-
-def _serialize_permission(permission):
-    return {
-        'id': permission.id,
-        'label': permission.name,
-        'codename': permission.codename,
-        'app_label': permission.content_type.app_label,
-        'model': permission.content_type.model,
-    }
-
-
 @staff_permission_required_json('accounts.view_user')
 @require_http_methods(['GET'])
 def user_list(request):
-    users = User.objects.filter(is_superuser=False).order_by('phone_number')
-    return JsonResponse({'users': [_serialize_user(u) for u in users]})
+    users = services.list_manageable_users()
+    return JsonResponse({'users': [services.serialize_user(u) for u in users]})
 
 
 @superuser_required_json
 @require_http_methods(['GET', 'POST'])
 def user_permissions(request, pk):
-    target = get_object_or_404(User, pk=pk, is_superuser=False)
-    available = assignable_permissions()
+    target = services.get_manageable_user(pk)
 
     if request.method == 'POST':
         payload = json.loads(request.body or '{}')
-        requested_ids = {int(i) for i in payload.get('permission_ids', [])}
-        valid_ids = set(available.values_list('id', flat=True))
-        target.user_permissions.set(requested_ids & valid_ids)
+        services.set_user_permissions(target, payload.get('permission_ids', []))
         return JsonResponse({'status': 'ok'})
 
-    assigned_ids = list(target.user_permissions.values_list('id', flat=True))
+    available = services.assignable_permissions()
     return JsonResponse({
-        'available': [_serialize_permission(p) for p in available],
-        'assigned_ids': assigned_ids,
+        'available': [services.serialize_permission(p) for p in available],
+        'assigned_ids': services.get_user_permission_ids(target),
     })
 
 
 @superuser_required_json
 @require_http_methods(['POST'])
 def user_role(request, pk):
-    target = get_object_or_404(User, pk=pk, is_superuser=False)
+    target = services.get_manageable_user(pk)
     payload = json.loads(request.body or '{}')
-    target.is_staff = bool(payload.get('is_staff'))
-    if not target.is_staff:
-        target.user_permissions.clear()
-    target.save(update_fields=['is_staff'])
-    return JsonResponse({'status': 'ok', 'user': _serialize_user(target)})
+    services.set_staff_status(target, bool(payload.get('is_staff')))
+    return JsonResponse({'status': 'ok', 'user': services.serialize_user(target)})

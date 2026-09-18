@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Credit Customers{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Credit Customers</h1>
+
+    {% if summary %}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr><th>Customer</th><th>Sales</th><th>Total Credit</th><th>Total Paid</th><th>Remaining</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for row in summary %}
+                        <tr>
+                            <td>{{ row.customer }}</td>
+                            <td>{{ row.sales_count }}</td>
+                            <td>{{ row.total_credit }}</td>
+                            <td>{{ row.total_paid }}</td>
+                            <td>{{ row.total_remaining }}</td>
+                            <td><a href="{% url 'credit:staff_customer_detail' row.customer.pk %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">No customers have credit sales yet.</p>
+    {% endif %}
+{% endblock %}

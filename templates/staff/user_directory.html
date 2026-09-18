@@ -37,7 +37,7 @@
                     },
                 },
                 mounted() {
-                    fetch("{% url 'accounts:api_user_list' %}")
+                    fetch("{% url 'staff:api_user_list' %}")
                         .then((res) => res.json())
                         .then((data) => {
                             this.users = data.users;

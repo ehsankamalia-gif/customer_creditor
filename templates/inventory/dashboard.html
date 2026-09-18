@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Inventory Dashboard{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Inventory Dashboard</h1>
+        <div>
+            <a href="{% url 'inventory:inventory_list' %}" class="btn btn-outline-secondary btn-sm">View Inventory List</a>
+            {% if perms.inventory.add_motorcycle %}
+                <a href="{% url 'inventory:import_stock' %}" class="btn btn-outline-primary btn-sm">Import Stock</a>
+                <a href="{% url 'inventory:add_motorcycle' %}" class="btn btn-primary btn-sm">Add Motorcycle</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Total Units</h2>
+                <p class="h3 mb-0">{{ stats.total }}</p>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Available</h2>
+                <p class="h3 mb-0 text-success">{{ stats.available }}</p>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Reserved</h2>
+                <p class="h3 mb-0 text-warning">{{ stats.reserved }}</p>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Sold</h2>
+                <p class="h3 mb-0 text-secondary">{{ stats.sold }}</p>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">In Transit</h2>
+                <p class="h3 mb-0 text-info">{{ stats.in_transit }}</p>
+            </div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Damaged</h2>
+                <p class="h3 mb-0 text-danger">{{ stats.damaged }}</p>
+            </div></div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Stock Value (at cost, unsold units)</h2>
+                <p class="h3 mb-0">{{ stats.stock_value }}</p>
+            </div></div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100"><div class="card-body">
+                <h2 class="h6 card-title text-muted">Potential Sales Value</h2>
+                <p class="h3 mb-0">{{ stats.potential_sales_value }}</p>
+            </div></div>
+        </div>
+    </div>
+{% endblock %}

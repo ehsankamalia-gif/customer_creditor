@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Spare Parts Ledger — Monthly Report{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Spare Parts Ledger — Monthly Report</h1>
+
+    {% if report %}
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Month</th><th>B/F</th>
+                        <th>Bank Credit</th><th>Cash Credit</th><th>Total Credit</th>
+                        <th>Bank Debit</th><th>Cash Debit</th><th>Total Debit</th>
+                        <th>Closing Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report %}
+                        <tr>
+                            <td>{{ row.month_key }}</td>
+                            <td>{{ row.brought_forward }}</td>
+                            <td>{{ row.bank_credit }}</td>
+                            <td>{{ row.cash_credit }}</td>
+                            <td>{{ row.total_credit }}</td>
+                            <td>{{ row.bank_debit }}</td>
+                            <td>{{ row.cash_debit }}</td>
+                            <td>{{ row.total_debit }}</td>
+                            <td>{{ row.closing_balance }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="fw-bold">
+                        <td colspan="4">Grand total credit</td>
+                        <td>{{ grand_total_credit }}</td>
+                        <td colspan="2">Grand total debit</td>
+                        <td>{{ grand_total_debit }}</td>
+                        <td>{{ overall_balance }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">No transactions recorded yet.</p>
+    {% endif %}
+{% endblock %}

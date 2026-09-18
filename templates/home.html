@@ -10,7 +10,9 @@
                     &mdash; role: <span class="badge bg-secondary">{{ user.role }}</span>
                 </p>
                 {% if user.is_staff %}
-                    <a href="{% url 'accounts:staff_dashboard' %}" class="btn btn-primary btn-sm">Go to Staff Dashboard</a>
+                    <a href="{% url 'staff:staff_dashboard' %}" class="btn btn-primary btn-sm">Go to Staff Dashboard</a>
+                {% else %}
+                    <a href="{% url 'credit:dashboard' %}" class="btn btn-primary btn-sm">Go to My Credit Dashboard</a>
                 {% endif %}
             {% else %}
                 <h1>Welcome</h1>
